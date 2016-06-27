@@ -1,5 +1,4 @@
 # MPLocalizer
-LGN Magno/Parvo Mapping
 
 This repository contains stimulus code that was used to map the M and P subdivisions of human LGN using fMRI in:
 
