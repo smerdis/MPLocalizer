@@ -1,7 +1,6 @@
 # MPLocalizer
-LGN Magno/Parvo Localizer
 
-This repository contains stimulus code that was used to localize the M and P subdivisions of human LGN using fMRI in:
+This repository contains stimulus code that was used to map the M and P subdivisions of human LGN using fMRI in:
 
 Denison, R. N., Vu, A. T., Yacoub, E., Feinberg, D. A., & Silver, M. A. (2014). 
 Functional mapping of the magnocellular and parvocellular subdivisions of human LGN. 
