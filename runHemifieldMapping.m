@@ -1,27 +1,26 @@
-function [p t] = rd_hemifieldMapping_v3(subjectID, run, steadyState)
+function [p t] = runHemifieldMapping(subjectID, run)
 %
-% function [p t] = rd_hemifieldMapping(subjectID, run, [steadyState])
+% function [p t] = rd_hemifieldMapping(subjectID, run)
 % 
 % Left/right hemifield localizer, block design.
 %
 % INPUTS:
 % subjectID is a string with a subject identifier
 % run is the run number
-% steadyState (OPTIONAL) should be 'steadyState' if you want to do a long,
-% full-field block.
 %
-% Modified from rd_hemifieldCheckerboardEvents_v2.m
+% Modified from rd_hemifieldCheckerboardEvents_v3.m
 %
 % v3 implements custom height mask
 %
 % Rachel Denison
-% 22 July 2012
+% 24 September 2016
 
-% triggerOnKey = 1; % use keyboard press as the trigger
-triggerOnKey = [];
-while isempty(triggerOnKey) || ~ismember(triggerOnKey, [1 0])
-    triggerOnKey = input('\nUse key press as trigger? (1 for yes, 0 for TTL only) ');
+if nargin==0
+    subjectID = 'test';
+    run = 1;
 end
+
+triggerOnKey = 1; % use keyboard press as the trigger
 
 % ------------------------------------------------------------------------
 % Experiment setup
@@ -29,47 +28,18 @@ end
 % Load experiment parameters
 p = hemifieldParams;
 
-if exist('steadyState','var') && strcmp(steadyState,'steadyState')
-    p = hemiUpdateSteadyStateParams(p);
-end 
-
-% Check params
-fprintf('\nTesting location: %s\n', p.testingLocation)
-fprintf('Screen size: [%.02f %.02f]\n', p.screenSize)
-fprintf('Viewing distance: %.02f\n\n', p.viewDist)
-ok = input('Ok to go on? (n if not): ', 's');
-if strcmp(ok,'n')
-    error('Exiting ... check hemifieldParams.m')
-end
-
 if p.saveFile==0
     fprintf('\n\nNOT SAVING the file from this run.\n\n')
 end
 
 % Load device numbers
 switch p.testingLocation
-    case '7T'
-        load('7TASGamma15b.mat','gammaTableMeanBottom')
-        gammaTable = gammaTableMeanBottom;
-        devNums = findKeyboardDevNums_7T;
-        if isempty(devNums.ButtonBox)
-            error('Could not find button box! Please check findKeyboardDevNums.')
-        end
-        if isempty(devNums.TTLPulse)
-            error('Could not find TTL device! Please check findKeyboardDevNums.')
-        end
-        fprintf('\n\nLoading 7T-AS gamma table and devNums ...\n\n')
-    case '3T'
-        load('BIC3TAvotecGamma.mat','gammaTable')
-        devNums = findKeyboardDevNums_scanner;
-        if isempty(devNums.ButtonBox)
-            error('Could not find button box! Please check findKeyboardDevNums.')
-        end
-        if isempty(devNums.TTLPulse)
-            error('Could not find TTL device! Please check findKeyboardDevNums.')
-        end
+    case 'location'
+        devNums = findKeyboardDevNums;
+        load('gamma.mat','gammaTable')
+        fprintf('\n\nLoading gamma table and devNums ...\n\n')
     otherwise
-        fprintf('\n\nNot testing in scanner ... will not load gamma table or devNums.\n\n')
+        fprintf('\n\nWill not load gamma table or devNums.\n\n')
 end
 
 % ------------------------------------------------------------------------
@@ -187,8 +157,8 @@ readyMessage = 'READY?\n\nPress any button to begin.';
 DrawFormattedText(win, readyMessage, 'center', 'center');
 Screen('Flip', win);
 switch p.testingLocation
-    case {'3T','7T'}
-        KbWait(devNums.ButtonBox);
+    case 'location'
+        KbWait(devNums.Keypad);
     otherwise
         KbWait;
 end

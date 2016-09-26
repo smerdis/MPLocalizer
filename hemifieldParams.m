@@ -1,29 +1,15 @@
 function p = hemifieldParams
 
 p.saveFile = 1;
-p.testingLocation = '7T'; 
+p.testingLocation = 'laptop'; 
 
 switch p.testingLocation
-    case '7T'
-        p.screenSize = [24 31]; % (cm) %% Measure!
-        p.screenRes = [1200 1600];
-        p.viewDist = 30; % (in) %% Measure!
-        p.triggerCode = KbName('5%'); % keyCode for 5% is 34 
-    case '3T' 
-        p.screenSize = [7.17 9.25]; % (in) RD's measurement
+   case 'laptop' 
+        p.screenSize = [12 16]; % (in)
         p.screenRes = [768 1024]; % 60 Hz. Must set screen to this!
-        p.viewDist = 11.25; % (in) RD's measurement    
-        % so screen is ? x ? deg visual angle
-        p.triggerCode = KbName('5'); % keyCode for 5 is 93     
-    case 'desk'
-        p.screenSize = [12 14.75]; % (in)
-        p.screenRes = [1024 1280];
-        p.viewDist = 30; % (in)
-    case 'laptop'
-        p.screenSize = [9 13]; % (in)
-        p.screenRes = [900 1440];
-        p.viewDist = 21; % (in)
-        p.triggerCode = KbName('5%'); % keyCode for 5% is 34
+        p.viewDist = 19.5; % (in)
+        p.triggerCode = KbName('5%');
+        p.keyCodes = [KbName('1!') KbName('2@') KbName('3#') KbName('4$')];
     otherwise
         error('Testing location not found!')
 end
