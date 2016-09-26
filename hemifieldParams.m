@@ -24,7 +24,7 @@ p.wedgePolar = 180*(pi/180); % (rad)
 p.fixSize = 0.1; %0.1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % custom mask
-p.customMaskHeight = 7; % in deg vis angle, [] if no custom mask
+p.customMaskHeight = []; % in deg vis angle, [] if no custom mask
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 p.thetaCyc = 6; % Full cycles per pi (180 deg)

@@ -266,11 +266,14 @@ p.run = run;
 
 % Save file
 if p.saveFile
-    saveFile = sprintf('data/%s_run%02d_HemifieldMapping_%s.mat', subjectID, run, datestr(now,'yyyymmdd'));
+    saveFile = sprintf('data/hemifieldMapping_%s_run%02d_%s.mat', subjectID, run, datestr(now,'yyyymmdd'));
     if exist(saveFile, 'file')
         fprintf('\n\nFile already exists. Saving generic-named file ...\n\n')
         save(sprintf('DATA_%s.mat',datestr(now,'yyyymmdd')), 'p', 't', 'subjectID', 'run')
     else
+        if ~exist('./data','dir')
+            mkdir('data')
+        end
         save(saveFile, 'p', 't', 'subjectID', 'run')
         fprintf('\n\nFile saved.\n\n')
     end
