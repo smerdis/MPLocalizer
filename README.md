@@ -10,6 +10,8 @@ Please cite our paper if you use this code.
 ***
 The main function is **runMPLocalizer.m**
 
+The isoluminance point is set in **mpLocalizerColorParamsStim.m**
+
 To display alternating left-right flickering checkerboards to localize the LGN, **runHemifieldMapping.m**
 
 The code runs on Matlab with Psychtoolbox. Your graphics card must be compatible with the following Psychtoolbox command:
