@@ -22,6 +22,8 @@ end
 
 triggerOnKey = 1; % use keyboard press as the trigger
 
+KbName('UnifyKeyNames') % allows referring to keys as 5% etc
+
 % ------------------------------------------------------------------------
 % Experiment setup
 % ------------------------------------------------------------------------
