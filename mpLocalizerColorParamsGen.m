@@ -19,7 +19,7 @@ p.blocksToInclude = repmat([1 1 2 2 3],1,3);
 % p.blocksToInclude = [1 2 3];
 p.condOrder = generateBlockSequenceColor(p.blocksToInclude);
 p.numCycles = length(p.condOrder); % a cycle means one stimulus block
-p.cycleDuration = 16; % (s)
+p.cycleDuration = 18; % (s)
 p.nWedgePhases = 1; % 1 wedge phase in cycle (always full screen)
 
 p.fixSize = 0.1; 
