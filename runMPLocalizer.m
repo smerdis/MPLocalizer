@@ -7,6 +7,8 @@ function [p t task] = runMPLocalizer(subjectID, run)
 %
 % Rachel Denison
 
+KbName('UnifyKeyNames') % allows referring to keys as 5% etc
+
 if nargin==0
     subjectID = 'test';
     run = 1;
@@ -30,7 +32,7 @@ end
 
 % Load device numbers
 switch p.Gen.testingLocation
-    case 'location'
+    case 'laptop'
         devNums = findKeyboardDevNums;
         load('gamma.mat','gammaTable')
         fprintf('\n\nLoading gamma table and devNums ...\n\n')
@@ -328,7 +330,7 @@ readyMessage = 'READY?\n\nPress any button to begin.';
 DrawFormattedText(win, readyMessage, 'center', 'center');
 Screen('Flip', win);
 switch p.Gen.testingLocation
-    case 'location'
+    case 'laptop'
         KbWait(devNums.Keypad);
     otherwise
         KbWait;
@@ -342,7 +344,7 @@ Screen('Flip', win);
 if triggerOnKey
     % FOR KEY START
     switch p.Gen.testingLocation
-        case 'location'
+        case 'laptop'
             t.Gen.trigger = KbWait(devNums.Keypad);
         otherwise
             t.Gen.trigger = KbWait;
@@ -486,12 +488,12 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
     while GetSecs < t.Gen.trigger + p.Gen.blankDuration(1) + ...
                 t.Gen.wedgeRequests(wedgeIdx-1) + t.Gen.wedgeDuration ...
                 + p.Gen.responseDuration - p.Gen.trialCushion - ifi/2
-        switch p.Gen.testingLocation
-            case 'location'
-                [keyIsDown secs keyCode] = PsychHID('KbCheck',devNums.Keypad);
-            otherwise
-                [keyIsDown secs keyCode] = KbCheck;
-        end
+        %switch p.Gen.testingLocation
+        %    case 'laptop'
+        %        [keyIsDown secs keyCode] = PsychHID('KbCheck',devNums.Keypad);
+        %    otherwise
+        [keyIsDown secs keyCode] = KbCheck;
+        %end
 %         WaitSecs(.01);
         if keyIsDown 
             RT = secs - vbl;
@@ -623,7 +625,7 @@ if p.Gen.saveFile
     end
 
     % write 3-col events files
-    events_fn = sprintf('data/sub-%s_ses-%s_task-mp_run-%02d_events.tsv', subjectID, datestr(now,'yyyymmdd')), run);
+    events_fn = sprintf('data/sub-%s_ses-%s_task-mp_run-%02d_events.tsv', subjectID, datestr(now,'yyyymmdd'), run);
     blocks_in_order = p.Gen.condNames(p.Gen.condOrder);
     events_file_contents = 'onset\tduration\tblockname\n' ;
     if p.Gen.cycleDuration == 18 %3T
