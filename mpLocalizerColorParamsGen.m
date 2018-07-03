@@ -14,12 +14,17 @@ switch p.testingLocation
         error('Testing location not found!')
 end
 
+% addition by AM: include the TR and make sure block lengths align with it.
+p.TR = 2.25; % for 3T using previous RD ep2d_neuro_... sequence
+
 p.condNames = {'M','P','blank'};
 p.blocksToInclude = repmat([1 1 2 2 3],1,3);
 % p.blocksToInclude = [1 2 3];
 p.condOrder = generateBlockSequenceColor(p.blocksToInclude);
 p.numCycles = length(p.condOrder); % a cycle means one stimulus block
+% This is the block length and should be an integer multiple of the TR!
 p.cycleDuration = 18; % (s)
+assert(mod(p.cycleDuration, p.TR)==0);
 p.nWedgePhases = 1; % 1 wedge phase in cycle (always full screen)
 
 p.fixSize = 0.1; 
@@ -50,9 +55,19 @@ switch p.maskType
 end
 
 p.temporalWaveform = 'sin'; % triangular, sin
-p.blankDuration = [8 8];
-p.responseDuration = 2; % (s)
+% How long to stay blank before and after the stimuli (s)
+% Again, these must be a multiple of the TR!
+p.blankDuration = [9 0]; % 9 seconds = 4TRs of blank at the beginning
+% This aligns with the paper, in which 4TRs at the beginning were discarded
+assert(all(mod(p.blankDuration, p.TR)==0));
+% This is added to the cycleDuration and should be an integer multiple of the TR!
+p.responseDuration = 2.25; % (s)
+assert(mod(p.responseDuration, p.TR)==0);
 p.trialCushion = 0.5; % (s) actual response window = responseDuration - trialCushion
+% Finally, calculate the total length of stimulus presentation
+% and verify it's a multiple of the TR
+p.total_length = (p.numCycles * (p.cycleDuration+p.responseDuration) + sum(p.blankDuration));
+assert(mod(p.total_length, p.TR)==0);
 
 task.maxTargets = 3; % maxTargets+1 is the number of intervals
 task.responseOptions = 0:task.maxTargets;
