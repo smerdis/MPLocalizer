@@ -14,10 +14,14 @@ switch p.testingLocation
         error('Testing location not found!')
 end
 
-p.numCycles = 8.5; % 9 % a cycle means one left-right cycle
-p.cycleDuration = 32; % (s) each left or right block is cycleDuration/2
+% addition by AM: include the TR and make sure block lengths align with it.
+p.TR = 2.25; % for 3T using previous RD ep2d_neuro_... sequence
+
+p.numCycles = 10.5; % a cycle means one left-right cycle, subtract .5 because reasons...
+p.cycleDuration = 27; % (s) each left or right block is cycleDuration/2
+assert(mod(p.numCycles*p.cycleDuration,p.TR)==0);
 p.nWedgePhases = 2; % hemifields
-p.flickRate = 8.0;
+p.flickRate = 8.0; % I (AM) believe this is half a flicker cycle, so 8.0 = 4Hz
 
 p.wedgeRadial = [0.3 30]; % radius (internal and external) of wedge (deg) eg. [0.5 12]
 p.wedgePolar = 180*(pi/180); % (rad) 
