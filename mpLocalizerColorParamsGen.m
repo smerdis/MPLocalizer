@@ -1,5 +1,7 @@
 function [p task] = mpLocalizerColorParamsGen
 
+KbName('UnifyKeyNames')
+
 p.saveFile = 1;
 p.testingLocation = 'laptop'; 
 
