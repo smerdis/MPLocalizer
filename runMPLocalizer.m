@@ -625,7 +625,7 @@ if p.Gen.saveFile
     end
 
     % write 3-col events files
-    events_fn = sprintf('data/sub-%s_ses-%s_task-mp_run-%02d_events.tsv', subjectID, datestr(now,'yyyymmdd'), run);
+    events_fn = sprintf('data/sub-%s_ses-%s_task-mp_run-%02d_events_%s.tsv', subjectID, datestr(now,'yyyymmdd'), run, datestr(now,'HHMM') );
     blocks_in_order = p.Gen.condNames(p.Gen.condOrder);
     events_file_contents = 'onset\tduration\ttrial_type\n' ;
     if p.Gen.cycleDuration == 18 %3T
