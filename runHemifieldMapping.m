@@ -158,12 +158,7 @@ Screen('FillRect', win, bgColor);
 readyMessage = 'READY?\n\nPress any button to begin.';
 DrawFormattedText(win, readyMessage, 'center', 'center');
 Screen('Flip', win);
-switch p.testingLocation
-    case 'location'
-        KbWait(devNums.Keypad);
-    otherwise
-        KbWait;
-end
+KbWait;
 
 % Wait for scanner trigger (KbWait checks every 5 ms)
 Screen('DrawTexture', win, fixtex);
@@ -179,7 +174,7 @@ else
     while isempty(keyPressed) || keyPressed~=p.triggerCode
         % removed reference to device number to make it work at the BIC:
         [keyIsDown secs keyCode] = PsychHID('KbCheck'); %,devNums.TTLPulse);
-        keyPressed = find(keyCode)
+        keyPressed = find(keyCode);
         if length(keyPressed) > 1;
             keyPressed = keyPressed(1);
         end
