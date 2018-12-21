@@ -20,7 +20,7 @@ if nargin==0
     run = 1;
 end
 
-triggerOnKey = 1; % use keyboard press as the trigger
+triggerOnKey = 0; % use keyboard press as the trigger
 
 KbName('UnifyKeyNames') % allows referring to keys as 5% etc
 
@@ -36,7 +36,7 @@ end
 
 % Load device numbers
 switch p.testingLocation
-    case 'location'
+    case 'laptop'
         devNums = findKeyboardDevNums;
         load('gamma.mat','gammaTable')
         fprintf('\n\nLoading gamma table and devNums ...\n\n')
@@ -177,8 +177,9 @@ else
     % FOR SCANNER START
     keyPressed = [];
     while isempty(keyPressed) || keyPressed~=p.triggerCode
-        [keyIsDown secs keyCode] = PsychHID('KbCheck',devNums.TTLPulse);
-        keyPressed = find(keyCode);
+        % removed reference to device number to make it work at the BIC:
+        [keyIsDown secs keyCode] = PsychHID('KbCheck'); %,devNums.TTLPulse);
+        keyPressed = find(keyCode)
         if length(keyPressed) > 1;
             keyPressed = keyPressed(1);
         end
