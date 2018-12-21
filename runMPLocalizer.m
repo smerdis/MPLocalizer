@@ -14,7 +14,7 @@ if nargin==0
     run = 1;
 end
 
-triggerOnKey = 1; % 1 to start with key, 0 to start with TTL pulse only
+triggerOnKey = 0; % 1 to start with key, 0 to start with TTL pulse only
 
 % ------------------------------------------------------------------------
 % Experiment setup
@@ -329,12 +329,12 @@ Screen('FillRect', win, bgColor);
 readyMessage = 'READY?\n\nPress any button to begin.';
 DrawFormattedText(win, readyMessage, 'center', 'center');
 Screen('Flip', win);
-switch p.Gen.testingLocation
-    case 'laptop'
-        KbWait(devNums.Keypad);
-    otherwise
-        KbWait;
-end
+% switch p.Gen.testingLocation
+%     case 'laptop'
+%         KbWait(devNums.Keypad);
+%     otherwise
+         KbWait;
+% end
 
 % Wait for scanner trigger (KbWait checks every 5 ms)
 Screen('DrawTexture', win, fixtex);
@@ -353,7 +353,7 @@ else
     % FOR SCANNER START
     keyPressed = '0';
     while ~strcmp(keyPressed,'5')
-        [keyIsDown secs keyCode] = PsychHID('KbCheck',devNums.TTLPulse);
+        [keyIsDown secs keyCode] = PsychHID('KbCheck')%,devNums.TTLPulse);
         keyPressed = KbName(keyCode);
         if length(keyPressed) > 1
             keyPressed = keyPressed(1);
