@@ -17,7 +17,7 @@ end
 % addition by AM: include the TR and make sure block lengths align with it.
 p.TR = 2.25; % for 3T using previous RD ep2d_neuro_... sequence
 
-p.numCycles = 10.5; % a cycle means one left-right cycle, subtract .5 because reasons...
+p.numCycles = 11.5; % a cycle means one left-right cycle, subtract .5 because reasons...
 p.cycleDuration = 27; % (s) each left or right block is cycleDuration/2
 assert(mod(p.numCycles*p.cycleDuration,p.TR)==0);
 p.nWedgePhases = 2; % hemifields

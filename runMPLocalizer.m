@@ -14,7 +14,7 @@ if nargin==0
     run = 1;
 end
 
-triggerOnKey = 1; % 1 to start with key, 0 to start with TTL pulse only
+triggerOnKey = 0; % 1 to start with key, 0 to start with TTL pulse only
 
 % ------------------------------------------------------------------------
 % Experiment setup
@@ -329,12 +329,12 @@ Screen('FillRect', win, bgColor);
 readyMessage = 'READY?\n\nPress any button to begin.';
 DrawFormattedText(win, readyMessage, 'center', 'center');
 Screen('Flip', win);
-switch p.Gen.testingLocation
-    case 'laptop'
-        KbWait(devNums.Keypad);
-    otherwise
-        KbWait;
-end
+% switch p.Gen.testingLocation
+%     case 'laptop'
+%         KbWait(devNums.Keypad);
+%     otherwise
+         KbWait;
+% end
 
 % Wait for scanner trigger (KbWait checks every 5 ms)
 Screen('DrawTexture', win, fixtex);
@@ -353,7 +353,7 @@ else
     % FOR SCANNER START
     keyPressed = '0';
     while ~strcmp(keyPressed,'5')
-        [keyIsDown secs keyCode] = PsychHID('KbCheck',devNums.TTLPulse);
+        [keyIsDown secs keyCode] = PsychHID('KbCheck')%,devNums.TTLPulse);
         keyPressed = KbName(keyCode);
         if length(keyPressed) > 1
             keyPressed = keyPressed(1);
@@ -625,7 +625,7 @@ if p.Gen.saveFile
     end
 
     % write 3-col events files
-    events_fn = sprintf('data/sub-%s_ses-%s_task-mp_run-%02d_events.tsv', subjectID, datestr(now,'yyyymmdd'), run);
+    events_fn = sprintf('data/sub-%s_ses-%s_task-mp_run-%02d_events_%s.tsv', subjectID, datestr(now,'yyyymmdd'), run, datestr(now,'HHMM') );
     blocks_in_order = p.Gen.condNames(p.Gen.condOrder);
     events_file_contents = 'onset\tduration\ttrial_type\n' ;
     if p.Gen.cycleDuration == 18 %3T
