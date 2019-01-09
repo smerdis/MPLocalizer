@@ -279,6 +279,19 @@ if p.saveFile
         save(saveFile, 'p', 't', 'subjectID', 'run')
         fprintf('\n\nFile saved.\n\n')
     end
+    
+    % write 3-col events files
+    blocks_in_order = ['L', 'R'];
+    events_fn = sprintf('data/sub-%s_ses-%s_task-hemi_run-%02d_events.tsv', subjectID, datestr(now,'yyyymmdd'), run);
+    blocks_in_order = p.Gen.condNames(p.Gen.condOrder);
+    events_file_contents = 'onset\tduration\ttrial_type\n' ;
+    time_between_onsets = p.cycleDuration/2 ;
+    for i=1:p.numCycles * 2
+        events_file_contents = [events_file_contents sprintf('%.02f\t%d\t%s\n',(i-1)*time_between_onsets,time_between_onsets, blocks_in_order{mod(i,length(blocks_in_order))})] ;
+    end
+    events_fid = fopen(events_fn, 'w');
+    fprintf(events_fid, events_file_contents);
+    fclose(events_fid);
 end
 
 % Done.
