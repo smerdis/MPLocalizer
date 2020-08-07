@@ -12,8 +12,8 @@ function [r0 th0 x0 y0] = chooseTargetPosition(r, theta, radialBounds)
 c = 0;
 
 while c==0
-    th0 = rand*2*pi;
-    r0 = rand*(radialBounds(2)-radialBounds(1)) + radialBounds(1);
+    th0 = rand*2*pi; % polar angle
+    r0 = rand*(radialBounds(2)-radialBounds(1)) + radialBounds(1); % ecc
     
     rmatch = find(round(r*10)==round(r0*10));
     thmatch = find(round(theta*30)==round(th0*30));
