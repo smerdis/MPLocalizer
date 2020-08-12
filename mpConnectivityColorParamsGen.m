@@ -26,11 +26,11 @@ p.blocksToInclude = 1:length(p.condNames);
 p.condOrder = generateBlockSequenceColor(p.blocksToInclude);
 p.numCycles = length(p.condOrder); % a cycle means one stimulus block
 % This is the block length and should be an integer multiple of the TR!
-p.cycleDuration = 54; % (s) - updated 2020-08-04 to increase "block" length
+p.cycleDuration = 36; % (s) - updated 2020-08-04 to increase "block" length
 assert(mod(p.cycleDuration, p.TR)==0);
 p.nWedgePhases = 1; % 1 wedge phase in cycle (always full screen)
 
-p.fixSize = 0.1; 
+p.fixSize = 0.2; 
 p.orientationOption = 'set'; % 'rand','set'
 switch p.orientationOption
     case 'set'
@@ -82,6 +82,7 @@ task.targetAmp = 1;
 task.radialBounds = [1 15]; 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % adjust for each subject [M P blank]
-task.unitSigma = [.2 .4 .50];  
+% update AM 2020-08-11 for 4 conditions leftM, leftP, rightM, rightP
+task.unitSigma = [.2 .4 .2 .4];  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

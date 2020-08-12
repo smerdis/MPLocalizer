@@ -92,9 +92,13 @@ fix(r < p.Gen.fixSize) = white;
 [fixx, fixy] = find(fix==white);
 fixLBounds = min([fixx fixy]);
 fixUBounds = max([fixx fixy]);
+% make left side black
+fix((r < p.Gen.fixSize) & (theta > pi/2) & (theta < 3*pi/2)) = black;
 fixPatch = fix(fixLBounds(1):fixUBounds(1), fixLBounds(2):fixUBounds(2));
 fixtex = Screen('MakeTexture', win, fixPatch);
+fixtexR = Screen('MakeTexture', win, fixPatch); % right side is white
 blackfixtex = Screen('MakeTexture', win, white - fixPatch);
+fixtexL = Screen('MakeTexture', win, white - fixPatch); % left side is white
 
 % ------------------------------------------------------------------------
 % Define gabor properties and layout
@@ -352,7 +356,7 @@ else
     % FOR SCANNER START
     keyPressed = '0';
     while ~strcmp(keyPressed,'5')
-        [keyIsDown secs keyCode] = PsychHID('KbCheck');%,devNums.TTLPulse);
+        [keyIsDown, secs, keyCode] = PsychHID('KbCheck');%,devNums.TTLPulse);
         keyPressed = KbName(keyCode);
         if length(keyPressed) > 1
             keyPressed = keyPressed(1);
@@ -477,12 +481,12 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
                 if length(keyPressed) > 1
                     keyPressed = keyPressed(1);
                 end
-                disp(keyPressed)
-                disp(strcmp(keyPressed, '1'));
+                %disp(keyPressed)
+                %disp(strcmp(keyPressed, '1'));
                 if (strcmp(keyPressed, '1') || strcmp(keyPressed, '1!'))
                     RT = secs - targetOnTime ;
                     flickToKbCheckUntil = -1; % stop listening for more responses
-                    fprintf("Correct response in %.2f secs",RT);
+                    fprintf("Correct response in %.2f secs\n",RT);
                     % add some accuracy info etc - but really just spit out
                     % a data frame.
                 end
