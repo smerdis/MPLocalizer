@@ -92,12 +92,13 @@ fix(r < p.Gen.fixSize) = white;
 [fixx, fixy] = find(fix==white);
 fixLBounds = min([fixx fixy]);
 fixUBounds = max([fixx fixy]);
+fixPatch = fix(fixLBounds(1):fixUBounds(1), fixLBounds(2):fixUBounds(2));
+fixtex = Screen('MakeTexture', win, fixPatch);
+blackfixtex = Screen('MakeTexture', win, white - fixPatch);
 % make left side black
 fix((r < p.Gen.fixSize) & (theta > pi/2) & (theta < 3*pi/2)) = black;
 fixPatch = fix(fixLBounds(1):fixUBounds(1), fixLBounds(2):fixUBounds(2));
-fixtex = Screen('MakeTexture', win, fixPatch);
 fixtexR = Screen('MakeTexture', win, fixPatch); % right side is white
-blackfixtex = Screen('MakeTexture', win, white - fixPatch);
 fixtexL = Screen('MakeTexture', win, white - fixPatch); % left side is white
 
 % ------------------------------------------------------------------------
@@ -300,7 +301,7 @@ for iBlock = 1:p.Gen.numCycles % for each block, e.g. M, P, etc
     cond = p.Gen.condNames{condIdx};
     
     for iTarget = 1:task.nTargets(iBlock)
-        [tr, tth, tx, ty] = chooseTargetPosition(r, theta, task.radialBounds);
+        [tr, tth, tx, ty] = chooseTargetPositionConnectivity(r, theta, task.radialBounds, cond);
         % tr is now the eccentricity in deg. of visual angle, and tth is
         % the angular position of the target
         task.targetPos{iBlock,iTarget} = [tx ty];
@@ -383,6 +384,13 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
     % stimulus initializations
     iCond = p.Gen.condOrder(wedgeIdx);
     cond = p.Gen.condNames{iCond};
+    if any(regexp(cond, 'left'))
+        fixtex_thiscond = fixtexL ;
+    elseif any(regexp(cond, 'right'))
+        fixtex_thiscond = fixtexR ;
+    else
+        fixtex_thiscond = fixtex ;
+    end
     wedgeIdx = wedgeIdx + 1;
     flickIdx = 1;
     rotIdx = 1;
@@ -469,7 +477,7 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
             Screen('DrawTexture', win, masktex);
 
             % Draw fixation
-            Screen('DrawTexture', win, fixtex);
+            Screen('DrawTexture', win, fixtex_thiscond);
 
             % Mark drawing ops as finished, so the GPU can do its drawing job while
             % we can compute updated parameters for next animation frame.
@@ -539,7 +547,7 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
 %     task.acc(wedgeIdx-1) = ...
 %         keyPressed==p.Gen.keyCodes;
     
-    Screen('DrawTexture', win, fixtex);
+    Screen('DrawTexture', win, fixtex_thiscond);
     vbl = Screen('Flip', win, t.Gen.trigger + p.Gen.blankDuration(1) + ...
         t.Gen.wedgeRequests(wedgeIdx-1) + t.Gen.wedgeDuration);
 end
