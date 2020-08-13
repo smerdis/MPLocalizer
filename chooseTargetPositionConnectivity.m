@@ -1,4 +1,4 @@
-function [r0 th0 x0 y0] = chooseTargetPositionConnectivity(r, theta, radialBounds, cond)
+function [r0, th0, x0, y0] = chooseTargetPositionConnectivity(r, theta, radialBounds, cond)
 %
 % function [r0 th0 x0 y0] = chooseTargetPositionConnectivity(r, theta, radialBounds, cond)
 %

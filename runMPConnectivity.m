@@ -305,6 +305,7 @@ for iBlock = 1:p.Gen.numCycles % for each block, e.g. M, P, etc
         % tr is now the eccentricity in deg. of visual angle, and tth is
         % the angular position of the target
         task.targetPos{iBlock,iTarget} = [tx ty];
+        task.targetPosPolar{iBlock, iTarget} = [tr tth];
         unitSigma = task.unitSigma(p.Gen.condOrder(iBlock));
         task.targetSigma{iBlock,iTarget} = setTargetSigma(tr, unitSigma, p.Gen);
         
@@ -662,24 +663,27 @@ if p.Gen.saveFile
         fprintf('\n\nFile saved.\n\n')
     end
 
-%     % write 3-col events files
-%     events_fn = sprintf('data/sub-%s_ses-%s_task-mpconn_run-%02d_events_%s.tsv', subjectID, datestr(now,'yyyymmdd'), run, datestr(now,'HHMM') );
-%     blocks_in_order = p.Gen.condNames(p.Gen.condOrder);
-%     events_file_contents = 'onset\tduration\ttrial_type\n' ;
-%     if p.Gen.cycleDuration == 18 %3T
-%         time_between_onsets = 20.25 ;
-%     elseif p.Gen.cycleDuration == 16 % 7T
-%         time_between_onsets = 18 ;
-%     else
-%         fprintf('\nERROR: cycleDuration is not 16 or 18! Assuming 18...\n') ;
-%         time_between_onsets = 20.25 ;
-%     end
-%     for i=1:length(blocks_in_order)
-%         events_file_contents = [events_file_contents sprintf('%.02f\t%d\t%s\n',(i-1)*time_between_onsets, p.Gen.cycleDuration, blocks_in_order{i})] ;
-%     end
-%     events_fid = fopen(events_fn, 'w');
-%     fprintf(events_fid, events_file_contents);
-%     fclose(events_fid);
+    % write 3-col events files
+    events_fn = sprintf('data/sub-%s_ses-%s_task-mpconn_run-%02d_blocks_%s.tsv', subjectID, datestr(now,'yyyymmdd'), run, datestr(now,'HHMM') );
+    blocks_in_order = p.Gen.condNames(p.Gen.condOrder);
+    events_file_contents = 'onset\tduration\ttrial_type\n' ;
+    time_between_onsets = p.Gen.cycleDuration + p.Gen.TR ;
+    for i=1:length(blocks_in_order)
+        events_file_contents = [events_file_contents sprintf('%.02f\t%d\t%s\n',(i-1)*time_between_onsets, p.Gen.cycleDuration, blocks_in_order{i})] ;
+    end
+    events_fid = fopen(events_fn, 'w');
+    fprintf(events_fid, events_file_contents);
+    fclose(events_fid);
+    
+    % write behavioral data into text file for analysis in python
+    target_fn = sprintf('data/sub-%s_ses-%s_task-mpconn_run-%02d_targets_%s.tsv', subjectID, datestr(now,'yyyymmdd'), run, datestr(now,'HHMM') );
+    target_fn_contents = 'block\ttargetnum\tonset\tr\tth\tx\ty\tacc\tRT\n' ;
+    for i=1:length(task.nTargets)
+        target_fn_contents = [target_fn_contents sprintf('%d\t%d\t%.02f\t%.02f\t%.02f\t%.02f\t%.02f\t%d\t%.02f\n',i,i,i,i,i,i,i,i,i)];
+    end
+    target_fid = fopen(target_fn, 'w');
+    fprintf(target_fid, target_fn_contents);
+    fclose(target_fid);
 end
 
 % Done.
