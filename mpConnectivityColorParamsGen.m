@@ -1,4 +1,4 @@
-function [p task] = mpConnectivityColorParamsGen
+function [p task] = mpConnectivityColorParamsGen(cond)
 
 KbName('UnifyKeyNames')
 
@@ -19,14 +19,16 @@ end
 % addition by AM: include the TR and make sure block lengths align with it.
 p.TR = 2.25; % for 3T using previous RD ep2d_neuro_... sequence
 
-p.condNames = {'leftM','leftP','rightM','rightP'};%,'blank'};
+%p.condNames = {'leftM','leftP','rightM','rightP'};%,'blank'};
+p.condNames = {cond};
+p.blocksToInclude = [1];
 %p.blocksToInclude = repmat([1 1 2 2 3],1,3);
-p.blocksToInclude = 1:length(p.condNames);
+p.blocksToInclude = repmat(1:length(p.condNames),1);
 %p.blocksToInclude = [1 2]% 3];
 p.condOrder = generateBlockSequenceColor(p.blocksToInclude);
 p.numCycles = length(p.condOrder); % a cycle means one stimulus block
 % This is the block length and should be an integer multiple of the TR!
-p.cycleDuration = 36; % (s) - updated 2020-08-04 to increase "block" length
+p.cycleDuration = 18; % (s) - updated 2020-08-04 to increase "block" length
 assert(mod(p.cycleDuration, p.TR)==0);
 p.nWedgePhases = 1; % 1 wedge phase in cycle (always full screen)
 
@@ -73,7 +75,7 @@ assert(all(mod(p.blankDuration, p.TR)==0));
 p.total_length = (p.numCycles * (p.cycleDuration) + sum(p.blankDuration));
 assert(mod(p.total_length, p.TR)==0);
 
-task.maxTargets = round(p.cycleDuration/4);
+task.maxTargets = round(p.cycleDuration/8);
 task.responseOptions = 1;
 task.targetCushion = 1; % time cushion on each side of targets
 task.ISISuggestedSigma = 2;

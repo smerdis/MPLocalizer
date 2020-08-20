@@ -1,4 +1,4 @@
-function [p, t, task] = runMPConnectivity(subjectID, run)
+function [p, t, task] = runMPConnectivity(subjectID, run, cond)
 % [p t task] = runMPConnectivity(subjectID, run)
 %
 % Main script for LGN M/P functional connectivity task.
@@ -10,13 +10,13 @@ if nargin==0
     run = 1;
 end
 
-triggerOnKey = 0; % 1 to start with key, 0 to start with TTL pulse only
+triggerOnKey = 1; % 1 to start with key, 0 to start with TTL pulse only
 
 % ------------------------------------------------------------------------
 % Experiment setup
 % ------------------------------------------------------------------------
 % Load experiment parameters
-[p.Gen, task] = mpConnectivityColorParamsGen;
+[p.Gen, task] = mpConnectivityColorParamsGen(cond);
 nConds = length(p.Gen.condNames);
 for iCond = 1:nConds % = p.condNames = 3 (M P blank)
     p.(p.Gen.condNames{iCond}) = mpConnectivityColorParamsStim(p.Gen.condNames{iCond}, p.Gen);
@@ -177,8 +177,8 @@ for iCond = 1:nConds
     end
 end
 
-fprintf('\nRequested block times:\n')
-disp(t.Gen.wedgeRequests + p.Gen.blankDuration(1));
+%fprintf('\nRequested block times:\n')
+%disp(t.Gen.wedgeRequests + p.Gen.blankDuration(1));
 
 % ------------------------------------------------------------------------
 % Set up gabor textures and mask texture
@@ -289,8 +289,8 @@ for iBlock = 1:p.Gen.numCycles
     t.Gen.targetOffRequests{iBlock} = t.Gen.targetOnRequests{iBlock} + task.targetDur;
 end
 
-fprintf('\nNumber of targets per block:\n')
-disp(task.nTargets);
+%fprintf('\nNumber of targets per block:\n')
+%disp(task.nTargets);
 
 % ------------------------------------------------------------------------
 % Set up target textures
@@ -306,6 +306,8 @@ for iBlock = 1:p.Gen.numCycles % for each block, e.g. M, P, etc
         % the angular position of the target
         task.targetPos{iBlock,iTarget} = [tx ty];
         task.targetPosPolar{iBlock, iTarget} = [tr tth];
+        task.targetAcc{iBlock, iTarget} = 0;
+        task.targetRT{iBlock, iTarget} = NaN;
         unitSigma = task.unitSigma(p.Gen.condOrder(iBlock));
         task.targetSigma{iBlock,iTarget} = setTargetSigma(tr, unitSigma, p.Gen);
         
@@ -331,7 +333,14 @@ save('tempdata.mat', 'p', 't', 'task', 'subjectID', 'run')
 Screen('FillRect', win, bgColor);
 
 % Press any key to begin
-readyMessage = 'READY?\n\nPress any button to begin.';
+if any(regexp(cond,'left'))
+    readyMessage = 'Target will appear on the left side of the screen.\n\nPress any button to begin.';
+elseif any(regexp(cond,'right'))
+    readyMessage = 'Target will appear on the right side of the screen.\n\nPress any button to begin.';
+else % this shouldn't happen, but we don't want to break if so.
+    readyMessage = 'READY?\n\nPress any button to begin.';
+end
+
 DrawFormattedText(win, readyMessage, 'center', 'center');
 Screen('Flip', win);
 % switch p.Gen.testingLocation
@@ -434,6 +443,8 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
     
     flickToKbCheckUntil = 0;
 
+    % current target number counter
+    targetCounter = 0;
     while flickIdx <= length(t.(cond).flickRequests)
 
         if mod(flickIdx, t.(cond).nFlicksPerOrientation)==0
@@ -461,14 +472,11 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
                     any(targetOnCStep{flickIdx-1}(cStepIdx-1,:),2)
                 if ~targetIsOn
                     targetOnTime = GetSecs;
+                    targetCounter = targetCounter+1;
                 end
-                %disp([wedgeIdx, flickIdx]);
-                %disp(targetOnFlick)
-                %disp(targetOnFlickIdxs)
                 Screen('DrawTexture', win, targettex{wedgeIdx-1, find(targetOnFlick(flickIdx-1,:))});
                 targetIsOn = 1;
                 flickToKbCheckUntil = flickIdx + (1/t.(cond).flickDuration) ;
-                %disp([flickIdx, flickToKbCheckUntil]);
             else
                 targetIsOn = 0;
             end
@@ -495,9 +503,11 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
                 if (strcmp(keyPressed, '1') || strcmp(keyPressed, '1!'))
                     RT = secs - targetOnTime ;
                     flickToKbCheckUntil = -1; % stop listening for more responses
-                    fprintf("Correct response in %.2f secs\n",RT);
+                    % fprintf("Correct response in %.2f secs\n",RT);
                     % add some accuracy info etc - but really just spit out
                     % a data frame.
+                    task.targetAcc{wedgeIdx-1, targetCounter} = 1;
+                    task.targetRT{wedgeIdx-1, targetCounter} = RT ;
                 end
                 %disp([keyPressed, keyCode])
             end
@@ -515,7 +525,8 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
 
         end
     end
-    
+
+%     
 %     % Collect response 
 %     Screen('FillRect', win, bgColor);
 %     Screen('DrawTexture', win, blackfixtex);
@@ -547,10 +558,10 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
 %     task.responseKey(wedgeIdx-1) = keyPressed;
 %     task.acc(wedgeIdx-1) = ...
 %         keyPressed==p.Gen.keyCodes;
-    
-    Screen('DrawTexture', win, fixtex_thiscond);
-    vbl = Screen('Flip', win, t.Gen.trigger + p.Gen.blankDuration(1) + ...
-        t.Gen.wedgeRequests(wedgeIdx-1) + t.Gen.wedgeDuration);
+%     
+%     Screen('DrawTexture', win, fixtex_thiscond);
+%     vbl = Screen('Flip', win, t.Gen.trigger + p.Gen.blankDuration(1) + ...
+%         t.Gen.wedgeRequests(wedgeIdx-1) + t.Gen.wedgeDuration);
 end
 
 % ------------------------------------------------------------------------
@@ -677,9 +688,18 @@ if p.Gen.saveFile
     
     % write behavioral data into text file for analysis in python
     target_fn = sprintf('data/sub-%s_ses-%s_task-mpconn_run-%02d_targets_%s.tsv', subjectID, datestr(now,'yyyymmdd'), run, datestr(now,'HHMM') );
-    target_fn_contents = 'block\ttargetnum\tonset\tr\tth\tx\ty\tacc\tRT\n' ;
+    target_fn_contents = 'blocknum\tblocktype\ttargetnum\tonset\tr\tth\tx\ty\tacc\tRT\n' ;
     for i=1:length(task.nTargets)
-        target_fn_contents = [target_fn_contents sprintf('%d\t%d\t%.02f\t%.02f\t%.02f\t%.02f\t%.02f\t%d\t%.02f\n',i,i,i,i,i,i,i,i,i)];
+        for j=1:task.nTargets(i)
+            onset = task.targetPresentationTimes{i}(j);
+            r = task.targetPosPolar{i,j}(1);
+            th = task.targetPosPolar{i,j}(2);
+            x = task.targetPos{i,j}(1);
+            y = task.targetPos{i,j}(2);
+            acc = task.targetAcc{i, j};
+            RT = task.targetRT{i, j};
+            target_fn_contents = [target_fn_contents sprintf('%d\t%d\t%d\t%.02f\t%.02f\t%.02f\t%.02f\t%.02f\t%d\t%.02f\n',i,p.Gen.condOrder(i),j,onset,r,th,x,y,acc,RT)];
+        end
     end
     target_fid = fopen(target_fn, 'w');
     fprintf(target_fid, target_fn_contents);
