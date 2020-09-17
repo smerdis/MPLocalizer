@@ -254,7 +254,7 @@ masktex = Screen('MakeTexture', win, mask);
 % ------------------------------------------------------------------------
 % Set up target timing
 % ------------------------------------------------------------------------
-nTargetsOptions = round(p.Gen.cycleDuration/10):task.maxTargets;
+nTargetsOptions = round(p.Gen.cycleDuration/18):task.maxTargets;
 for iBlock = 1:p.Gen.numCycles
     % randomly select the number of targets for this block
     task.nTargets(iBlock) = nTargetsOptions(randi(length(nTargetsOptions)));
@@ -641,10 +641,11 @@ title('Flick intervals')
 % % Overall accuracy for all conditions but blank
 % overallAcc = ...
 %     mean(task.acc(p.Gen.condOrder~=find(strcmp(p.Gen.condNames,'blank'))));
-% feedbackText = sprintf('Accuracy: %d%%', round(overallAcc*100));
-% DrawFormattedText(win, feedbackText, 'center', 'center')
-% Screen('Flip', win)
-% WaitSecs(3);
+overallAcc = (sum(cell2mat(task.targetAcc))/task.nTargets) ;
+feedbackText = sprintf('Accuracy: %d%%', round(overallAcc*100));
+DrawFormattedText(win, feedbackText, 'center', 'center')
+Screen('Flip', win)
+WaitSecs(3);
 
 % ------------------------------------------------------------------------
 % Close onscreen window
