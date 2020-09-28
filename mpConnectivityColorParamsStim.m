@@ -36,7 +36,7 @@ else
 end
 
 p.flickRate = p.flickerFrequency*2; % flicks per s; 2 flicks make a full cycle
-p.orientationChangeRate = length(Gen.gratingOrientations)/(Gen.cycleDuration) % orientation changes per s
+p.orientationChangeRate = length(Gen.gratingOrientations)/(Gen.cycleDuration); % orientation changes per s
 
 
 

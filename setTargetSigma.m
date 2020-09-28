@@ -11,4 +11,8 @@ unitSigmaPx = ...
     ang2pix(unitSigma, p.screenSize(1), p.screenRes(1), p.viewDist, 'central');
 
 % linear scaling of target size with target eccentricity
-sigma = unitSigmaPx*r0;
+sigma = unitSigmaPx*r0
+% 2020-09-23: based on piloting, impose minimum size (in pixels)
+if sigma < 30
+    sigma = 30
+end

@@ -289,8 +289,8 @@ for iBlock = 1:p.Gen.numCycles
     t.Gen.targetOffRequests{iBlock} = t.Gen.targetOnRequests{iBlock} + task.targetDur;
 end
 
-%fprintf('\nNumber of targets per block:\n')
-%disp(task.nTargets);
+fprintf('\nNumber of targets per block:\n')
+disp(task.nTargets);
 
 % ------------------------------------------------------------------------
 % Set up target textures
@@ -387,6 +387,7 @@ end
 % ------------------------------------------------------------------------
 count = 0;
 wedgeIdx = 1;
+task.nFalseAlarms = 0;
 t.Gen.flipsHeaders = {'vbl','iCond','wedgeIdx','flickIdx','cStepIdx','targetIsOn'};
 
 while wedgeIdx <= length(t.Gen.wedgeRequests)
@@ -442,6 +443,7 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
     task.targetOnCStep{wedgeIdx-1} = targetOnCStep;
     
     flickToKbCheckUntil = 0;
+    responseKeyOn = 0;
 
     % current target number counter
     targetCounter = 0;
@@ -473,6 +475,7 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
                 if ~targetIsOn
                     targetOnTime = GetSecs;
                     targetCounter = targetCounter+1;
+                    responseKeyOn = 0;
                 end
                 Screen('DrawTexture', win, targettex{wedgeIdx-1, find(targetOnFlick(flickIdx-1,:))});
                 targetIsOn = 1;
@@ -492,24 +495,28 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
             % we can compute updated parameters for next animation frame.
             Screen('DrawingFinished', win);
 
-            if flickIdx < flickToKbCheckUntil
-                [keyIsDown, secs, keyCode] = PsychHID('KbCheck');%,devNums.TTLPulse);
-                keyPressed = KbName(keyCode);
-                if length(keyPressed) > 1
-                    keyPressed = keyPressed(1);
-                end
-                %disp(keyPressed)
-                %disp(strcmp(keyPressed, '1'));
-                if (strcmp(keyPressed, '1') || strcmp(keyPressed, '1!'))
+            %if flickIdx < flickToKbCheckUntil
+            [keyIsDown, secs, keyCode] = PsychHID('KbCheck');%,devNums.TTLPulse);
+            keyPressed = KbName(keyCode);
+            if length(keyPressed) > 1
+                keyPressed = keyPressed(1);
+            end
+            if ~responseKeyOn && (strcmp(keyPressed, '1') || strcmp(keyPressed, '1!'))
+                responseKeyOn = 1;
+                if (flickIdx < flickToKbCheckUntil) % response within window
                     RT = secs - targetOnTime ;
                     flickToKbCheckUntil = -1; % stop listening for more responses
-                    % fprintf("Correct response in %.2f secs\n",RT);
+                    fprintf("Correct response in %.2f secs\n",RT);
                     % add some accuracy info etc - but really just spit out
                     % a data frame.
                     task.targetAcc{wedgeIdx-1, targetCounter} = 1;
                     task.targetRT{wedgeIdx-1, targetCounter} = RT ;
+                else % answered after response window, but we want to record false alarms
+                    fprintf("response outside window: %2d, %2d\n",wedgeIdx-1,targetCounter);
+                    task.nFalseAlarms = task.nFalseAlarms+1;
                 end
-                %disp([keyPressed, keyCode])
+            elseif ~(strcmp(keyPressed, '1') || strcmp(keyPressed, '1!')) && responseKeyOn
+                responseKeyOn = 0;
             end
 
             % Flip screen when time for next contrast step
@@ -525,43 +532,6 @@ while wedgeIdx <= length(t.Gen.wedgeRequests)
 
         end
     end
-
-%     
-%     % Collect response 
-%     Screen('FillRect', win, bgColor);
-%     Screen('DrawTexture', win, blackfixtex);
-%     vbl = Screen('Flip', win, t.Gen.trigger + p.Gen.blankDuration(1) + ...
-%         t.Gen.wedgeRequests(wedgeIdx-1) + t.Gen.wedgeDuration - ifi/2);
-%     
-%     RT = NaN;
-%     keyPressed = NaN;
-%     while GetSecs < t.Gen.trigger + p.Gen.blankDuration(1) + ...
-%                 t.Gen.wedgeRequests(wedgeIdx-1) + t.Gen.wedgeDuration ...
-%                 %+ p.Gen.responseDuration - p.Gen.trialCushion
-%                 - ifi/2 ;
-%         %switch p.Gen.testingLocation
-%         %    case 'laptop'
-%         %        [keyIsDown secs keyCode] = PsychHID('KbCheck',devNums.Keypad);
-%         %    otherwise
-%         [keyIsDown, secs, keyCode] = KbCheck;
-%         %end
-% %         WaitSecs(.01);
-%         if keyIsDown 
-%             RT = secs - vbl;
-%             keyPressed = find(keyCode);
-%             if length(keyPressed) > 1
-%                 keyPressed = keyPressed(1);
-%             end
-%         end
-%     end
-%     task.RTs(wedgeIdx-1) = RT;
-%     task.responseKey(wedgeIdx-1) = keyPressed;
-%     task.acc(wedgeIdx-1) = ...
-%         keyPressed==p.Gen.keyCodes;
-%     
-%     Screen('DrawTexture', win, fixtex_thiscond);
-%     vbl = Screen('Flip', win, t.Gen.trigger + p.Gen.blankDuration(1) + ...
-%         t.Gen.wedgeRequests(wedgeIdx-1) + t.Gen.wedgeDuration);
 end
 
 % ------------------------------------------------------------------------
@@ -699,7 +669,7 @@ if p.Gen.saveFile
             y = task.targetPos{i,j}(2);
             acc = task.targetAcc{i, j};
             RT = task.targetRT{i, j};
-            target_fn_contents = [target_fn_contents sprintf('%d\t%d\t%d\t%.02f\t%.02f\t%.02f\t%.02f\t%.02f\t%d\t%.02f\n',i,p.Gen.condOrder(i),j,onset,r,th,x,y,acc,RT)];
+            target_fn_contents = [target_fn_contents sprintf('%d\t%s\t%d\t%.02f\t%.02f\t%.02f\t%.02f\t%.02f\t%d\t%.02f\n',i,p.Gen.condNames{i},j,onset,r,th,x,y,acc,RT)];
         end
     end
     target_fid = fopen(target_fn, 'w');
